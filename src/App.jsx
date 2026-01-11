@@ -1,4 +1,4 @@
-import {Route, Routes} from "react-router-dom"
+import { Route, Routes, Navigate } from "react-router-dom" 
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
 import Home from './pages/Home'
@@ -15,7 +15,8 @@ function App() {
         <Route path="/admin" element={<Admin />}/>
         <Route path="/hostaldetails/:id" element={<HostalDetails />} />
         <Route path="/login" element={<LoginPage/>}/>
-        <Route path="/register" element={<RegisterPage/>}/>      
+        <Route path="/register" element={<RegisterPage/>}/>
+        <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
