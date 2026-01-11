@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import './style.css';
 
-// Página completa de Registro
 export function RegisterPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -18,26 +17,14 @@ export function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [serverError, setServerError] = useState(''); // Nuevo estado para errores del servidor
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'El nombre es obligatorio';
-    } else if (formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'El nombre debe tener al menos 2 caracteres';
-    } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(formData.firstName)) {
-      newErrors.firstName = 'El nombre solo puede contener letras';
-    }
-
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'El apellido es obligatorio';
-    } else if (formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'El apellido debe tener al menos 2 caracteres';
-    } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(formData.lastName)) {
-      newErrors.lastName = 'El apellido solo puede contener letras';
-    }
-
+    if (!formData.firstName.trim()) newErrors.firstName = 'El nombre es obligatorio';
+    if (!formData.lastName.trim()) newErrors.lastName = 'El apellido es obligatorio';
+    
     if (!formData.email.trim()) {
       newErrors.email = 'El correo electrónico es obligatorio';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -46,15 +33,11 @@ export function RegisterPage() {
 
     if (!formData.password) {
       newErrors.password = 'La contraseña es obligatoria';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Debe contener mayúsculas, minúsculas y números';
+    } else if (formData.password.length < 6) { // Ajustado a 6 según tu backend
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
 
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirma tu contraseña';
-    } else if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Las contraseñas no coinciden';
     }
 
@@ -65,34 +48,54 @@ export function RegisterPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+    setServerError('');
   };
 
-  const handleSubmit = () => {
+  // --- LÓGICA REAL DE REGISTRO ---
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    
-    setTimeout(() => {
+    setServerError('');
+
+    try {
+      // 1. Petición al Backend
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      // 2. Manejo de errores (ej: Email ya existe)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        // Si el backend envía un mensaje, úsalo, si no, pon uno genérico
+        throw new Error(errorData.message || 'Error al registrar el usuario');
+      }
+
+      // 3. Éxito
       setLoading(false);
       setSuccess(true);
       
-      const user = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        initials: `${formData.firstName[0]}${formData.lastName[0]}`.toUpperCase()
-      };
-      
-      localStorage.setItem('registeredUser', JSON.stringify(user));
-      
+      // Opcional: Podrías hacer login automático aquí porque el backend devuelve el token
+      // Pero para mantenerlo simple, redirigimos al login
       setTimeout(() => {
         navigate('/login');
       }, 2000);
-    }, 1500);
+
+    } catch (error) {
+      console.error("Error registro:", error);
+      setLoading(false);
+      setServerError(error.message); // Muestra el mensaje real del backend
+    }
   };
 
   return (
@@ -112,6 +115,7 @@ export function RegisterPage() {
             <p className="auth-subtitle">Únete a WaveHeaven y comienza tu aventura</p>
           </div>
 
+          {/* Mensaje de Éxito */}
           {success && (
             <div className="auth-alert auth-alert-success">
               <CheckCircle size={20} />
@@ -119,6 +123,14 @@ export function RegisterPage() {
                 <p className="auth-alert-title">¡Cuenta creada exitosamente!</p>
                 <p className="auth-alert-message">Redirigiendo al inicio de sesión...</p>
               </div>
+            </div>
+          )}
+
+          {/* Mensaje de Error del Servidor */}
+          {serverError && (
+            <div className="auth-alert auth-alert-error" style={{marginBottom: '1rem', color: '#ef4444', backgroundColor: '#fef2f2', padding: '10px', borderRadius: '6px', display: 'flex', gap: '10px'}}>
+              <AlertCircle size={20} />
+              <p>{serverError}</p>
             </div>
           )}
 
@@ -136,11 +148,7 @@ export function RegisterPage() {
                   placeholder="Tu nombre"
                 />
               </div>
-              {errors.firstName && (
-                <p className="auth-error-message">
-                  <AlertCircle size={14} /> {errors.firstName}
-                </p>
-              )}
+              {errors.firstName && <p className="auth-error-message">{errors.firstName}</p>}
             </div>
 
             <div className="auth-form-group">
@@ -156,11 +164,7 @@ export function RegisterPage() {
                   placeholder="Tu apellido"
                 />
               </div>
-              {errors.lastName && (
-                <p className="auth-error-message">
-                  <AlertCircle size={14} /> {errors.lastName}
-                </p>
-              )}
+              {errors.lastName && <p className="auth-error-message">{errors.lastName}</p>}
             </div>
 
             <div className="auth-form-group">
@@ -176,11 +180,7 @@ export function RegisterPage() {
                   placeholder="tu@email.com"
                 />
               </div>
-              {errors.email && (
-                <p className="auth-error-message">
-                  <AlertCircle size={14} /> {errors.email}
-                </p>
-              )}
+              {errors.email && <p className="auth-error-message">{errors.email}</p>}
             </div>
 
             <div className="auth-form-group">
@@ -193,7 +193,7 @@ export function RegisterPage() {
                   value={formData.password}
                   onChange={handleChange}
                   className={`auth-input ${errors.password ? 'auth-input-error' : ''}`}
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Mínimo 6 caracteres"
                 />
                 <button
                   type="button"
@@ -203,11 +203,7 @@ export function RegisterPage() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="auth-error-message">
-                  <AlertCircle size={14} /> {errors.password}
-                </p>
-              )}
+              {errors.password && <p className="auth-error-message">{errors.password}</p>}
             </div>
 
             <div className="auth-form-group">
@@ -230,11 +226,7 @@ export function RegisterPage() {
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {errors.confirmPassword && (
-                <p className="auth-error-message">
-                  <AlertCircle size={14} /> {errors.confirmPassword}
-                </p>
-              )}
+              {errors.confirmPassword && <p className="auth-error-message">{errors.confirmPassword}</p>}
             </div>
 
             <button
