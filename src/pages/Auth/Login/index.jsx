@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-react';
 import './style.css';
 
-// Página completa de Login
 export function LoginPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -18,78 +17,73 @@ export function LoginPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    // Limpiar errores al escribir
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     setLoginError('');
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'El correo electrónico es obligatorio';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Ingresa un correo electrónico válido';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'La contraseña es obligatoria';
-    }
-
+    if (!formData.email.trim()) newErrors.email = 'El correo electrónico es obligatorio';
+    if (!formData.password) newErrors.password = 'La contraseña es obligatoria';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  // --- LÓGICA REAL DE LOGIN ---
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    
-    setTimeout(() => {
-      const registeredUser = localStorage.getItem('registeredUser');
-      
-      if (registeredUser) {
-        const parsedUser = JSON.parse(registeredUser);
-        
-        if (formData.email === parsedUser.email && formData.password === parsedUser.password) {
-          const user = {
-            firstName: parsedUser.firstName,
-            lastName: parsedUser.lastName,
-            email: parsedUser.email,
-            initials: parsedUser.initials
-          };
-          
-          localStorage.setItem('user', JSON.stringify(user));
-          setLoading(false);
-          navigate('/');
-          window.location.reload();
-          return;
-        }
-      }
-      
-      const mockUser = {
-        email: 'usuario@ejemplo.com',
-        password: 'Password123'
-      };
+    setLoginError('');
 
-      if (formData.email === mockUser.email && formData.password === mockUser.password) {
-        const user = {
-          firstName: 'Juan',
-          lastName: 'Pérez',
+    try {
+      // 1. Petición al Backend (Render)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           email: formData.email,
-          initials: 'JP'
-        };
-        
-        localStorage.setItem('user', JSON.stringify(user));
-        setLoading(false);
-        navigate('/');
-        window.location.reload();
-      } else {
-        setLoading(false);
-        setLoginError('Correo electrónico o contraseña incorrectos. Intenta nuevamente.');
+          password: formData.password
+        })
+      });
+
+      // 2. Verificar si hubo error (ej: contraseña mal)
+      if (!response.ok) {
+        throw new Error('Credenciales inválidas');
       }
-    }, 1500);
+
+      // 3. Obtener datos reales
+      const data = await response.json();
+
+      // 4. Guardar en localStorage para que el Header lo vea
+      // Guardamos el token
+      localStorage.setItem('jwt_token', data.token);
+      
+      // Guardamos el usuario con el formato que espera tu Header
+      const userToSave = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        // Si el backend no devuelve iniciales, las creamos aquí
+        initials: data.initials || (data.firstName[0] + data.lastName[0]).toUpperCase(),
+        role: data.role
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userToSave));
+
+      // 5. Redirigir
+      setLoading(false);
+      navigate('/');
+      window.location.reload(); // Recargar para actualizar el Header
+
+    } catch (error) {
+      console.error("Error login:", error);
+      setLoading(false);
+      setLoginError('Correo electrónico o contraseña incorrectos.');
+    }
   };
 
   return (
@@ -110,12 +104,9 @@ export function LoginPage() {
           </div>
 
           {loginError && (
-            <div className="auth-alert auth-alert-error">
+            <div className="auth-alert auth-alert-error" style={{display: 'flex', gap: '10px', color: '#ef4444', backgroundColor: '#fef2f2', padding: '10px', borderRadius: '6px', marginBottom: '1rem'}}>
               <AlertCircle size={20} />
-              <div>
-                <p className="auth-alert-title">Error al iniciar sesión</p>
-                <p className="auth-alert-message">{loginError}</p>
-              </div>
+              <p>{loginError}</p>
             </div>
           )}
 
@@ -133,11 +124,7 @@ export function LoginPage() {
                   placeholder="tu@email.com"
                 />
               </div>
-              {errors.email && (
-                <p className="auth-error-message">
-                  <AlertCircle size={14} /> {errors.email}
-                </p>
-              )}
+              {errors.email && <p className="auth-error-message">{errors.email}</p>}
             </div>
 
             <div className="auth-form-group">
@@ -160,11 +147,7 @@ export function LoginPage() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="auth-error-message">
-                  <AlertCircle size={14} /> {errors.password}
-                </p>
-              )}
+              {errors.password && <p className="auth-error-message">{errors.password}</p>}
             </div>
 
             <button
@@ -173,14 +156,7 @@ export function LoginPage() {
               disabled={loading}
               onClick={handleSubmit}
             >
-              {loading ? (
-                <>
-                  <span className="auth-spinner"></span>
-                  Iniciando sesión...
-                </>
-              ) : (
-                'Iniciar sesión'
-              )}
+              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </button>
 
             <p className="auth-switch-text">
@@ -193,10 +169,6 @@ export function LoginPage() {
                 Crear cuenta
               </button>
             </p>
-          </div>
-
-          <div className="auth-demo-info">
-            <p><strong>Demo:</strong> usuario@ejemplo.com / Password123</p>
           </div>
         </div>
       </div>
