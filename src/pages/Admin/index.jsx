@@ -32,7 +32,7 @@ const Admin = () => {
       const response = await fetch(`${API_URL}/api/products`);
       if (response.ok) {
         const data = await response.json();
-        setCabins(data); // Actualizamos la tabla con datos reales
+        setCabins(data.content || []); 
       } else {
         console.error("Error al cargar productos");
       }
