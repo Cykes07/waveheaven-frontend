@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // <--- Importamos useEffect
 import './style.css';
 import Sidebar from '../../components/SideBar';
 import Header from '../../components/AdminHeader';
@@ -7,142 +7,174 @@ import AdminFilters from '../../components/AdminFilters';
 import AddHostal from '../../components/AddHostal';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 
-// Componente principal
 const Admin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [cabinToDelete, setCabinToDelete] = useState(null);
   const [editingCabin, setEditingCabin] = useState(null);
   
-  // Estado para las cabañas (ahora incluye categoría)
-  const [cabins, setCabins] = useState([
-    { id: '01', name: 'Cabaña Esmeralda', category: 'montana', description: 'Hermosa cabaña en la montaña' },
-    { id: '02', name: 'Cabaña Paige', category: 'playa', description: 'Cabaña frente al mar' },
-    { id: '03', name: 'Cabaña Jefferson', category: 'bosque', description: 'Rodeada de naturaleza' },
-    { id: '04', name: 'Cabaña Mayo', category: 'lago', description: 'Vista al lago' },
-    { id: '05', name: 'Cabaña Thumbiko', category: 'campo', description: 'En medio del campo' },
-    { id: '06', name: 'Cabaña Brisas del Río', category: 'montana', description: 'Junto al río' },
-    { id: '07', name: 'Cabañas Sol y Mar', category: 'playa', description: 'Sol y playa' },
-    { id: '08', name: 'Cabaña Cielos Abiertos', category: 'desierto', description: 'Cielos despejados' },
-    { id: '09', name: 'Cabañas Bosque Azul', category: 'bosque', description: 'Bosque encantado' },
-    { id: '10', name: 'Cabaña Laguna Serena', category: 'lago', description: 'Laguna tranquila' }
-  ]);
+  // Estado inicial vacío (se llenará desde el Backend)
+  const [cabins, setCabins] = useState([]); 
+
+  // URL de tu API (Asegúrate de tener VITE_API_URL en tu .env)
+  const API_URL = import.meta.env.VITE_API_URL || 'https://waveheaven-backend.onrender.com';
+  
+  // Función para obtener el token (si usas login)
+  const getToken = () => localStorage.getItem('token'); 
+
+  // 1. CARGAR DATOS REALES AL INICIAR
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/products`);
+      if (response.ok) {
+        const data = await response.json();
+        setCabins(data); // Actualizamos la tabla con datos reales
+      } else {
+        console.error("Error al cargar productos");
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+    }
+  };
 
   const openModal = () => {
     setEditingCabin(null);
     setIsModalOpen(true);
   };
 
-  // Función para editar
   const handleEdit = (cabin) => {
     setEditingCabin(cabin);
     setIsModalOpen(true);
   };
 
-  // Función para abrir el modal de confirmación de eliminación
   const handleDeleteClick = (cabin) => {
     setCabinToDelete(cabin);
     setIsDeleteModalOpen(true);
   };
 
-  // Función para confirmar la eliminación
-  const handleConfirmDelete = () => {
+  // 2. BORRAR DATOS EN EL BACKEND
+  const handleConfirmDelete = async () => {
     if (cabinToDelete) {
-      // Eliminar de la base de datos (aquí simulas con el estado)
-      setCabins(prevCabins => 
-        prevCabins.filter(cabin => cabin.id !== cabinToDelete.id)
-      );
+      try {
+        const response = await fetch(`${API_URL}/api/products/${cabinToDelete.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${getToken()}` // Importante para permisos de Admin
+          }
+        });
+
+        if (response.ok) {
+          // Si se borró bien en BD, actualizamos la lista visual
+          setCabins(prevCabins => prevCabins.filter(c => c.id !== cabinToDelete.id));
+          console.log('Producto eliminado de la BD');
+        } else {
+          alert("Error al eliminar (¿Tienes permisos de Admin?)");
+        }
+      } catch (error) {
+        console.error("Error al eliminar:", error);
+      }
       
-      // Aquí harías la llamada al backend
-      // deleteCabinFromDatabase(cabinToDelete.id);
-      
-      console.log('Producto eliminado:', cabinToDelete);
-      
-      // Cerrar modal y limpiar
       setIsDeleteModalOpen(false);
       setCabinToDelete(null);
     }
   };
 
-  // Función para cancelar la eliminación
   const handleCancelDelete = () => {
     setIsDeleteModalOpen(false);
     setCabinToDelete(null);
-    console.log('Eliminación cancelada');
   };
 
-  const user = {
-    name: 'John Doue',
-    email: 'jdoe@acme.com'
-  };
-
-  // Función para guardar producto (crear o editar)
-  const handleProductSubmit = (productData) => {
-    if (editingCabin) {
-      // Modo edición - actualizar producto existente
-      setCabins(prevCabins =>
-        prevCabins.map(cabin =>
-          cabin.id === editingCabin.id
-            ? { ...cabin, ...productData }
-            : cabin
-        )
-      );
-      console.log('Producto actualizado:', { ...editingCabin, ...productData });
-    } else {
-      // Modo creación - agregar nuevo producto
-      const newCabin = {
-        id: String(cabins.length + 1).padStart(2, '0'),
+  // 3. GUARDAR (CREAR O EDITAR) EN EL BACKEND
+  const handleProductSubmit = async (productData) => {
+    const token = getToken();
+    
+    // Preparar el cuerpo de la petición (Ajusta según lo que pide tu Backend Java)
+    const productPayload = {
         name: productData.name,
-        category: productData.category,
         description: productData.description,
-        images: productData.images
-      };
-      setCabins(prevCabins => [...prevCabins, newCabin]);
-      console.log('Producto creado:', newCabin);
+        // Tu backend espera un Category ID o nombre, ajusta esto:
+        categoryId: 1, // <--- OJO: Necesitas enviar el ID real de la categoría, no el nombre 'montana'
+        price: 100.00, // <--- Tu backend seguro pide precio, agrégalo si falta
+        // images: productData.images (El manejo de imágenes suele requerir MultipartFile o URLs)
+    };
+
+    try {
+        let response;
+        if (editingCabin) {
+            // EDITAR (PUT)
+            response = await fetch(`${API_URL}/api/products/${editingCabin.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(productPayload)
+            });
+        } else {
+            // CREAR (POST)
+            response = await fetch(`${API_URL}/api/products`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(productPayload)
+            });
+        }
+
+        if (response.ok) {
+            fetchProducts(); // Recargar la lista desde el servidor
+            console.log('Guardado exitoso');
+        } else {
+            const errorText = await response.text();
+            alert(`Error al guardar: ${errorText}`);
+        }
+    } catch (error) {
+        console.error("Error de conexión al guardar:", error);
     }
   };
-  
+
+  const user = { name: 'Admin', email: 'admin@waveheaven.com' };
+
   return (
     <>
-    <Header user={user}/>  
-    <div className="app">
-      <Sidebar />
-      <main className="main-content">
-        <div className="content">
-          <div className="content-header">
-            <AdminFilters/>
-            <button className="add-button" onClick={openModal}>Agregar</button>
-            
-            {/* Modal para agregar/editar producto */}
-            <AddHostal
-              isOpen={isModalOpen}
-              onClose={() => {
-                setIsModalOpen(false);
-                setEditingCabin(null);
-              }}
-              onSubmit={handleProductSubmit}
-              editMode={!!editingCabin}
-              initialData={editingCabin}
+      <Header user={user}/>  
+      <div className="app">
+        <Sidebar />
+        <main className="main-content">
+          <div className="content">
+            <div className="content-header">
+              <AdminFilters/>
+              <button className="add-button" onClick={openModal}>Agregar</button>
+              
+              <AddHostal
+                isOpen={isModalOpen}
+                onClose={() => { setIsModalOpen(false); setEditingCabin(null); }}
+                onSubmit={handleProductSubmit}
+                editMode={!!editingCabin}
+                initialData={editingCabin}
+              />
+            </div>
+
+            <CabinTable
+              cabins={cabins}
+              onEdit={handleEdit}
+              onDelete={handleDeleteClick}
+            />
+
+            <DeleteConfirmModal
+              isOpen={isDeleteModalOpen}
+              onConfirm={handleConfirmDelete}
+              onCancel={handleCancelDelete}
+              itemName={cabinToDelete?.name}
             />
           </div>
-
-          {/* Tabla de cabañas */}
-          <CabinTable
-            cabins={cabins}
-            onEdit={handleEdit}
-            onDelete={handleDeleteClick}
-          />
-
-          {/* Modal de confirmación de eliminación */}
-          <DeleteConfirmModal
-            isOpen={isDeleteModalOpen}
-            onConfirm={handleConfirmDelete}
-            onCancel={handleCancelDelete}
-            itemName={cabinToDelete?.name}
-          />
-        </div>
-      </main> 
-    </div>
+        </main> 
+      </div>
     </>
   );
 };
