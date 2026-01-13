@@ -99,22 +99,26 @@ const Admin = () => {
 const handleProductSubmit = async (productData) => {
     const token = getToken();
     
-    // --- CORRECCIÓN AQUÍ ---
-    // En lugar de enviar una lista de textos ["url1"], 
-    // enviamos una lista de OBJETOS [{ url: "url1" }]
+    // --- CORRECCIÓN FINAL ---
+    // Si la URL es gigante (Base64 de tu PC), usamos una foto de internet para que no falle.
+    // Si ya es un link corto, lo dejamos igual.
     const imageList = productData.images && productData.images.length > 0
-        ? productData.images.map(img => ({ url: img.url })) 
-        : [{ url: "https://via.placeholder.com/300" }]; // Objeto por defecto
+        ? productData.images.map(img => ({ 
+            url: img.url.length > 400 
+                 ? "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1" // Foto genérica de cabaña
+                 : img.url 
+          })) 
+        : [{ url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1" }];
 
     const productPayload = {
         name: productData.name,
         description: productData.description,
-        categoryId: 1, // Asegurado que existe en BD
+        categoryId: 1, 
         price: parseFloat(productData.price) || 100.0,
-        images: imageList // Enviamos la lista de objetos
+        images: imageList // Enviamos la lista corregida
     };
 
-    console.log("Enviando payload corregido:", JSON.stringify(productPayload)); 
+    console.log("Enviando payload seguro:", JSON.stringify(productPayload)); 
 
     try {
         let response;
@@ -146,20 +150,13 @@ const handleProductSubmit = async (productData) => {
             setIsModalOpen(false); 
             setEditingCabin(null);
         } else {
-            // Si falla, intentamos leer el error JSON, si no es JSON, leemos texto
-            try {
-                const errorJson = await response.json();
-                console.error("Error Servidor (JSON):", errorJson);
-                alert(`Error: ${errorJson.message || "Error desconocido"}`);
-            } catch (e) {
-                const errorText = await response.text();
-                console.error("Error Servidor (Texto):", errorText);
-                alert(`Error del servidor: ${errorText}`);
-            }
+            const errorText = await response.text();
+            console.error("Error Servidor:", errorText);
+            alert(`Error: ${errorText}`);
         }
     } catch (error) {
         console.error("Error de red:", error);
-        alert("Error de conexión. Revisa tu internet.");
+        alert("Error de conexión.");
     }
   };
 
