@@ -12,29 +12,27 @@ const Admin = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [cabinToDelete, setCabinToDelete] = useState(null);
   const [editingCabin, setEditingCabin] = useState(null);
-  
-  // 1. Estado para las cabañas (VACÍO al inicio, se llena con la API)
   const [cabins, setCabins] = useState([]); 
-
-  // Configuración de API y Token
   const API_URL = import.meta.env.VITE_API_URL || 'https://waveheaven-backend.onrender.com';
   const getToken = () => localStorage.getItem('jwt_token'); 
 
-  // 2. Obtener Usuario Real (Esto arregla el problema de "John Doue")
   const getRealUser = () => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      return {
-        name: `${parsed.firstName} ${parsed.lastName}`,
-        email: parsed.email
-      };
+      try {
+        const parsed = JSON.parse(storedUser);
+        return {
+          name: `${parsed.firstName} ${parsed.lastName}`,
+          email: parsed.email
+        };
+      } catch (e) {
+        return { name: 'Admin', email: 'admin@waveheaven.com' };
+      }
     }
     return { name: 'Admin', email: 'admin@waveheaven.com' };
   };
   const currentUser = getRealUser();
 
-  // 3. Cargar datos al iniciar
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -44,7 +42,6 @@ const Admin = () => {
       const response = await fetch(`${API_URL}/api/products`);
       if (response.ok) {
         const data = await response.json();
-        // IMPORTANTE: Si es paginado, tomamos .content. Si es lista, data.
         setCabins(data.content || data || []); 
       } else {
         console.error("Error al cargar productos");
@@ -69,7 +66,6 @@ const Admin = () => {
     setIsDeleteModalOpen(true);
   };
 
-  // 4. Borrar Producto Real
   const handleConfirmDelete = async () => {
     if (cabinToDelete) {
       try {
@@ -99,15 +95,23 @@ const Admin = () => {
     setCabinToDelete(null);
   };
 
+
   const handleProductSubmit = async (productData) => {
     const token = getToken();
-    
+
+    const imageList = productData.images && productData.images.length > 0
+        ? productData.images.map(img => img.url)
+        : ["https://via.placeholder.com/300"]; 
+
     const productPayload = {
         name: productData.name,
         description: productData.description,
         categoryId: 1, 
         price: parseFloat(productData.price) || 100.0,
+        images: imageList 
     };
+
+    console.log("Enviando payload:", productPayload); 
 
     try {
         let response;
@@ -134,20 +138,22 @@ const Admin = () => {
 
         if (response.ok) {
             fetchProducts(); 
-            setIsModalOpen(false);
+            setIsModalOpen(false); 
             setEditingCabin(null);
         } else {
             const errorText = await response.text();
-            alert(`Error al guardar: ${errorText}`);
+            console.error("Error del servidor:", errorText);
+            alert(`Error del servidor: ${errorText}`);
         }
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error de red:", error);
+        alert("Error de conexión al guardar el producto.");
     }
   };
 
   return (
     <>
-      <Header user={currentUser}/> 
+      <Header user={currentUser}/>
       <div className="app">
         <Sidebar />
         <main className="main-content">
