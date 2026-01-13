@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // <--- Importamos useEffect
+import React, { useState, useEffect } from 'react';
 import './style.css';
 import Sidebar from '../../components/SideBar';
 import Header from '../../components/AdminHeader';
@@ -13,16 +13,28 @@ const Admin = () => {
   const [cabinToDelete, setCabinToDelete] = useState(null);
   const [editingCabin, setEditingCabin] = useState(null);
   
-  // Estado inicial vacío (se llenará desde el Backend)
+  // 1. Estado para las cabañas (VACÍO al inicio, se llena con la API)
   const [cabins, setCabins] = useState([]); 
 
-  // URL de tu API (Asegúrate de tener VITE_API_URL en tu .env)
+  // Configuración de API y Token
   const API_URL = import.meta.env.VITE_API_URL || 'https://waveheaven-backend.onrender.com';
-  
-  // Función para obtener el token (si usas login)
-  const getToken = () => localStorage.getItem('token'); 
+  const getToken = () => localStorage.getItem('jwt_token'); 
 
-  // 1. CARGAR DATOS REALES AL INICIAR
+  // 2. Obtener Usuario Real (Esto arregla el problema de "John Doue")
+  const getRealUser = () => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      return {
+        name: `${parsed.firstName} ${parsed.lastName}`,
+        email: parsed.email
+      };
+    }
+    return { name: 'Admin', email: 'admin@waveheaven.com' };
+  };
+  const currentUser = getRealUser();
+
+  // 3. Cargar datos al iniciar
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -32,7 +44,8 @@ const Admin = () => {
       const response = await fetch(`${API_URL}/api/products`);
       if (response.ok) {
         const data = await response.json();
-        setCabins(data.content || []); 
+        // IMPORTANTE: Si es paginado, tomamos .content. Si es lista, data.
+        setCabins(data.content || data || []); 
       } else {
         console.error("Error al cargar productos");
       }
@@ -56,28 +69,26 @@ const Admin = () => {
     setIsDeleteModalOpen(true);
   };
 
-  // 2. BORRAR DATOS EN EL BACKEND
+  // 4. Borrar Producto Real
   const handleConfirmDelete = async () => {
     if (cabinToDelete) {
       try {
         const response = await fetch(`${API_URL}/api/products/${cabinToDelete.id}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${getToken()}` // Importante para permisos de Admin
+            'Authorization': `Bearer ${getToken()}`
           }
         });
 
         if (response.ok) {
-          // Si se borró bien en BD, actualizamos la lista visual
-          setCabins(prevCabins => prevCabins.filter(c => c.id !== cabinToDelete.id));
-          console.log('Producto eliminado de la BD');
+          setCabins(prev => prev.filter(c => c.id !== cabinToDelete.id));
+          console.log('Producto eliminado');
         } else {
-          alert("Error al eliminar (¿Tienes permisos de Admin?)");
+          alert("Error al eliminar. Verifica que tengas rol ADMIN.");
         }
       } catch (error) {
-        console.error("Error al eliminar:", error);
+        console.error("Error:", error);
       }
-      
       setIsDeleteModalOpen(false);
       setCabinToDelete(null);
     }
@@ -88,24 +99,19 @@ const Admin = () => {
     setCabinToDelete(null);
   };
 
-  // 3. GUARDAR (CREAR O EDITAR) EN EL BACKEND
   const handleProductSubmit = async (productData) => {
     const token = getToken();
     
-    // Preparar el cuerpo de la petición (Ajusta según lo que pide tu Backend Java)
     const productPayload = {
         name: productData.name,
         description: productData.description,
-        // Tu backend espera un Category ID o nombre, ajusta esto:
-        categoryId: 1, // <--- OJO: Necesitas enviar el ID real de la categoría, no el nombre 'montana'
-        price: 100.00, // <--- Tu backend seguro pide precio, agrégalo si falta
-        // images: productData.images (El manejo de imágenes suele requerir MultipartFile o URLs)
+        categoryId: 1, 
+        price: parseFloat(productData.price) || 100.0,
     };
 
     try {
         let response;
         if (editingCabin) {
-            // EDITAR (PUT)
             response = await fetch(`${API_URL}/api/products/${editingCabin.id}`, {
                 method: 'PUT',
                 headers: {
@@ -115,7 +121,7 @@ const Admin = () => {
                 body: JSON.stringify(productPayload)
             });
         } else {
-            // CREAR (POST)
+            // CREAR
             response = await fetch(`${API_URL}/api/products`, {
                 method: 'POST',
                 headers: {
@@ -127,22 +133,21 @@ const Admin = () => {
         }
 
         if (response.ok) {
-            fetchProducts(); // Recargar la lista desde el servidor
-            console.log('Guardado exitoso');
+            fetchProducts(); 
+            setIsModalOpen(false);
+            setEditingCabin(null);
         } else {
             const errorText = await response.text();
             alert(`Error al guardar: ${errorText}`);
         }
     } catch (error) {
-        console.error("Error de conexión al guardar:", error);
+        console.error("Error:", error);
     }
   };
 
-  const user = { name: 'Admin', email: 'admin@waveheaven.com' };
-
   return (
     <>
-      <Header user={user}/>  
+      <Header user={currentUser}/> 
       <div className="app">
         <Sidebar />
         <main className="main-content">
