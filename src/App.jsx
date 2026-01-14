@@ -17,6 +17,8 @@ function App() {
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/register" element={<RegisterPage/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/product/:id" element={<Detail />} />
+        <Route path="/detail/:id" element={<Detail />} />
     </Routes>
   )
 }
