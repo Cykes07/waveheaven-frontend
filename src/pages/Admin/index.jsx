@@ -159,8 +159,117 @@ const handleProductSubmit = async (productData) => {
         alert("Error de conexión.");
     }
   };
+  const accommodations = [
+    {
+        "id": 1,
+        "title": "Cabaña Tradicional con Pórtico",
+        "available": 5,
+        "image": "image1.jpg"
+    },
+    {
+        "id": 2,
+        "title": "Cabaña sobre Pilotes Turquesa",
+        "available": 3,
+        "image": "image2.jpg"
+    },
+    {
+        "id": 3,
+        "title": "Casa de Playa con Porche Amplio",
+        "available": 4,
+        "image": "image3.jpg"
+    },
+    {
+        "id": 4,
+        "title": "Casa Modular de Playa",
+        "available": 2,
+        "image": "image4.jpg"
+    },
+    {
+        "id": 5,
+        "title": "Bungalow Rústico frente al Mar",
+        "available": 6,
+        "image": "image5.jpg" 
+    },
+    {
+        "id": 6,
+        "title": "Villa Moderna Minimalista",
+        "available": 1,
+        "image": "image6.jpg" 
+    },
+    {
+        "id": 7,
+        "title": "Chalet de Playa con Terraza",
+        "available": 2,
+        "image": "image7.jpg" 
+    },
+    {
+        "id": 8,
+        "title": "Beach Shack Bohemio",
+        "available": 4,
+        "image": "image8.jpeg" 
+    },
+    {
+        "id": 9,
+        "title": "Casa Estilo Mediterráneo",
+        "available": 3,
+        "image": "image9.jpg" 
+    },
+    {
+        "id": 10,
+        "title": "Villa Eco-sustentable sobre Agua",
+        "available": 1,
+        "image": "image10.jpg" 
+    }
+  ];
+  const migrarDatos = async () => {
+    const token = getToken();
+    let cont = 0;
 
-  return (
+    if (!confirm("¿Estás seguro de que quieres subir todas estas cabañas a la Base de Datos?")) return;
+
+    for (const item of DATOS_VIEJOS) {
+      // 2. ADAPTAMOS LOS DATOS (El Backend es exigente)
+      const payload = {
+        // Mapeamos: nombre_viejo -> nombre_nuevo_backend
+        name: item.title || item.name || "Cabaña sin nombre", 
+        description: item.description || "Sin descripción",
+        categoryId: 1, // Usamos la categoría 1 que ya creamos
+        price: parseFloat(item.price) || 100.0,
+        
+        // Truco de la imagen segura que hicimos antes
+        images: [{
+           url: (item.image && item.image.startsWith('http')) 
+                ? item.image 
+                : "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1"
+        }]
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/api/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            console.log(`Cabaña "${payload.name}" subida con éxito.`);
+            cont++;
+        } else {
+            console.error(`Error subiendo ${payload.name}`);
+        }
+      } catch (e) {
+        console.error("Error de red");
+      }
+    }
+
+    alert(`¡Proceso terminado! Se subieron ${cont} cabañas.`);
+    fetchProducts(); // Recargar la tabla para verlas
+  };
+
+return (
     <>
       <Header user={currentUser}/>
       <div className="app">
@@ -169,8 +278,28 @@ const handleProductSubmit = async (productData) => {
           <div className="content">
             <div className="content-header">
               <AdminFilters/>
+              
+              {/* Botón Normal que ya tenías */}
               <button className="add-button" onClick={openModal}>Agregar</button>
               
+              {/* --- AQUÍ COMIENZA EL BOTÓN NUEVO --- */}
+              <button 
+                onClick={migrarDatos} 
+                style={{
+                    backgroundColor: '#ff9800', /* Naranja */
+                    color: 'white',
+                    marginLeft: '10px',
+                    padding: '10px 15px',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                }}
+              >
+                ⚡ Migrar Datos
+              </button>
+              {/* --- AQUÍ TERMINA EL BOTÓN NUEVO --- */}
+
               <AddHostal
                 isOpen={isModalOpen}
                 onClose={() => { setIsModalOpen(false); setEditingCabin(null); }}
@@ -197,6 +326,6 @@ const handleProductSubmit = async (productData) => {
       </div>
     </>
   );
-};
+}; // Fin del componente Admin
 
 export default Admin;
