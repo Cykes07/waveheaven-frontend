@@ -159,7 +159,7 @@ const handleProductSubmit = async (productData) => {
         alert("Error de conexión.");
     }
   };
-  const accommodations = [
+  const DATOS_VIEJOS = [
     {
         "id": 1,
         "title": "Cabaña Tradicional con Pórtico",
