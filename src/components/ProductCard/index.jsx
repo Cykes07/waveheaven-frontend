@@ -30,7 +30,7 @@ const ProductCard = ({ id, name, title, description, price, image, category }) =
           <span className="product-price">${price} / noche</span>
           
           {/* 3. ENLACE CORRECTO: Cambia '/detail/' por la ruta que uses en App.jsx */}
-          <Link to={`/detail/${id}`} className="product-button">
+          <Link to={`/hostaldetails/${id}`} className="product-button">
             Ver Detalles
           </Link>
         </div>
