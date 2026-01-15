@@ -8,6 +8,7 @@ import Footer from "./components/Footer"
 import { LoginPage} from "./pages/Auth/Login"
 import { RegisterPage } from "./pages/Auth/Register"
 
+
 function App() {
   return (
     <Routes>
@@ -17,8 +18,6 @@ function App() {
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/register" element={<RegisterPage/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
-        <Route path="/product/:id" element={<Detail />} />
-        <Route path="/detail/:id" element={<Detail />} />
     </Routes>
   )
 }
