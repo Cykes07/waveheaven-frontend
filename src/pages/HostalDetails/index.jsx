@@ -1,152 +1,104 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, X } from 'lucide-react';
-import accommodations from '../../data/mockdata';
-import './style.css';
-import GalleryModal from '../../components/GalleryModal'
+import { useParams, Link } from 'react-router-dom';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import './style.css'; // Asegúrate de que tienes estilos aquí
 
-export default function HostalDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const HostalDetails = () => {
+  const { id } = useParams(); // 1. Capturamos el ID de la URL (ej: 52)
   const [product, setProduct] = useState(null);
-  const [showGalleryModal, setShowGalleryModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // URL del Backend
+  const API_URL = import.meta.env.VITE_API_URL || 'https://waveheaven-backend.onrender.com';
 
   useEffect(() => {
-    const foundProduct = accommodations.find(item => item.id === parseInt(id));
-    
-    if (foundProduct) {
-      // Construir la ruta correcta desde public
-      const imagePath = foundProduct.image.startsWith('/') 
-        ? foundProduct.image 
-        : `/${foundProduct.image}`;
+    const fetchProductDetails = async () => {
+      try {
+        // 2. Pedimos los detalles específicos de este ID
+        const response = await fetch(`${API_URL}/api/products/${id}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setProduct(data);
+        } else {
+          console.error("Producto no encontrado");
+        }
+      } catch (error) {
+        console.error("Error de conexión:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const productWithImages = {
-        ...foundProduct,
-        // Simulamos 5 imágenes para el ejemplo - en producción vendrían del backend
-        images: [
-          imagePath,
-          imagePath,
-          imagePath,
-          imagePath,
-          imagePath
-        ],
-        description: `Hermoso alojamiento "${foundProduct.title}" perfecto para tu próxima escapada. Este espacio único ofrece todas las comodidades que necesitas para una estadía inolvidable. Disfruta de vistas espectaculares, ambiente tranquilo y acceso a las mejores atracciones de la zona. Ideal para familias, parejas o grupos de amigos que buscan relajarse y crear recuerdos especiales.`,
-        category: "Alojamiento de Playa",
-        price: `$${80 + (foundProduct.id * 15)}/noche`,
-        capacity: `${foundProduct.available * 2} personas`,
-        location: "Ubicación privilegiada"
-      };
-      setProduct(productWithImages);
-    } else {
-      navigate('/');
-    }
-  }, [id, navigate]);
+    fetchProductDetails();
+  }, [id]);
 
-  if (!product) {
-    return (
-      <div className="loading-container">
-        <p>Cargando producto...</p>
-      </div>
-    );
-  }
+  if (loading) return <div style={{textAlign:'center', marginTop:'50px'}}>Cargando detalles...</div>;
+  if (!product) return <div style={{textAlign:'center', marginTop:'50px'}}>Producto no encontrado :(</div>;
 
-  const handleBack = () => {
-    navigate('/');
-  };
+  // 3. Preparamos la imagen (Backend envía lista de objetos)
+  const imageUrl = product.images && product.images.length > 0 
+      ? product.images[0].url 
+      : "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1"; // Imagen por defecto
 
   return (
-    <div className="product-detail-container">
-      {/* Header */}
-      <header className="product-detail-header">
-        <h1 className="product-detail-title">{product.title}</h1>
-        <button className="back-button" onClick={handleBack}>
-          <ArrowLeft size={20} />
-          Volver
-        </button>
-      </header>
+    <>
+      <Header />
+      
+      <div className="details-container" style={{ padding: '40px', maxWidth: '1000px', margin: '0 auto' }}>
+        
+        <Link to="/" style={{ textDecoration: 'none', color: '#666', marginBottom: '20px', display: 'inline-block' }}>
+          ← Volver al inicio
+        </Link>
 
-      {/* Body */}
-      <div className="product-detail-body">
-        {/* Bloque de imágenes al 100% del ancho */}
-        <div className="images-block">
-          {/* Imagen principal - mitad izquierda */}
-          <div className="main-image-container">
-            <img
-              src={product.images[0]}
-              alt={`${product.title} - Principal`}
-              className="main-image"
-              onError={(e) => { e.target.src = '/placeholder.png'; }}
+        <div className="details-content" style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
+          
+          {/* Columna Izquierda: Imagen */}
+          <div className="details-image" style={{ flex: '1 1 400px' }}>
+            <img 
+              src={imageUrl} 
+              alt={product.name} 
+              style={{ width: '100%', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} 
             />
           </div>
 
-          {/* Grid de 4 imágenes - mitad derecha */}
-          <div className="secondary-images-grid">
-            {product.images.slice(1, 5).map((image, index) => (
-              <div key={index} className="secondary-image-container">
-                <img
-                  src={image}
-                  alt={`${product.title} - ${index + 2}`}
-                  className="secondary-image"
-                  onError={(e) => { e.target.src = '/placeholder.png'; }}
-                />
-              </div>
-            ))}
-            
-            {/* Botón "Ver más" en la última imagen */}
-            <button 
-              className="view-more-button"
-              onClick={() => setShowGalleryModal(true)}
-            >
-              Ver más
-            </button>
-          </div>
-        </div>
-
-        {/* Información del producto */}
-        <div className="product-info-section">
-          <div className="info-column">
-            <h2 className="section-title">Descripción</h2>
-            <p className="product-description">
-              {product.description}
+          {/* Columna Derecha: Información */}
+          <div className="details-info" style={{ flex: '1 1 400px' }}>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '10px' }}>{product.name}</h1>
+            <p className="category" style={{ color: '#888', marginBottom: '20px' }}>
+                Categoría: {product.categoryName || "Estancia Exclusiva"}
             </p>
-          </div>
-
-          <div className="info-column">
-            <h2 className="section-title">Información</h2>
-            <div className="info-list">
-              <div className="info-item">
-                <span className="info-label">Categoría</span>
-                <span className="info-value">{product.category}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Disponibilidad</span>
-                <span className="info-value">{product.available} unidades disponibles</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Precio estimado</span>
-                <span className="info-value">{product.price}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Capacidad</span>
-                <span className="info-value">{product.capacity}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Ubicación</span>
-                <span className="info-value">{product.location}</span>
-              </div>
+            
+            <h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>${product.price} <span style={{fontSize:'1rem', fontWeight:'normal'}}>/ noche</span></h2>
+            
+            <div className="description" style={{ lineHeight: '1.6', color: '#555', marginBottom: '30px' }}>
+              <h3>Descripción</h3>
+              <p>{product.description}</p>
             </div>
+
+            <button 
+                style={{
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    padding: '15px 30px',
+                    border: 'none',
+                    borderRadius: '5px',
+                    fontSize: '1.1rem',
+                    cursor: 'pointer',
+                    width: '100%'
+                }}
+                onClick={() => alert("¡Función de Reserva próximamente!")}
+            >
+                Reservar Ahora
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Modal de galería completa */}
-      {showGalleryModal && (
-        <GalleryModal 
-          images={product.images}
-          title={product.title}
-          onClose={() => setShowGalleryModal(false)}
-        />
-      )}
-    </div>
+      <Footer />
+    </>
   );
-}
+};
+
+export default HostalDetails;
