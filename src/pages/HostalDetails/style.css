@@ -1,5 +1,3 @@
-/* src/pages/HostalDetails/style.css */
-
 .details-container {
   max-width: 1000px;
   margin: 40px auto;
@@ -8,7 +6,6 @@
   animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Animación suave de entrada */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -29,29 +26,29 @@
 
 .details-content {
   background-color: white;
-  border-radius: 24px; /* Bordes muy redondeados y modernos */
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.05); /* Sombra muy suave y difusa */
+  box-shadow: 0 10px 40px rgba(0,0,0,0.05);
 }
 
-/* IMAGEN HERO GIGANTE */
+/* IMAGEN HERO */
 .details-image-wrapper {
   width: 100%;
-  height: 500px; /* Altura fija impactante */
+  height: 500px; /* Altura fija para impacto visual */
   background-color: #f0f0f0;
 }
 
 .details-hero-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Asegura que la foto se vea bien sin deformarse */
+  object-fit: cover; /* Evita deformaciones */
   display: block;
 }
 
-/* INFORMACIÓN */
+/* INFO */
 .details-info {
   padding: 40px 50px;
-  text-align: center; /* Todo centrado para efecto elegante */
+  text-align: center;
 }
 
 .details-header {
@@ -83,11 +80,11 @@
   font-size: 1.1rem;
   line-height: 1.8;
   color: #444;
-  max-width: 700px; /* Limita el ancho del texto para que sea fácil de leer */
-  margin: 0 auto 40px auto; /* Centrado horizontalmente */
+  max-width: 700px;
+  margin: 0 auto 40px auto;
 }
 
-/* PIE DE PÁGINA: PRECIO Y BOTÓN */
+/* FOOTER */
 .details-footer {
   display: flex;
   flex-direction: column;
@@ -111,13 +108,13 @@
 }
 
 .reserve-button {
-  background-color: #1a1a1a; /* Negro elegante */
+  background-color: #1a1a1a;
   color: white;
   border: none;
   padding: 16px 48px;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: 50px; /* Botón píldora */
+  border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -129,14 +126,6 @@
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-.details-availability {
-  margin-top: 20px;
-  font-size: 0.9rem;
-  color: #27ae60;
-  font-weight: 500;
-}
-
-/* Ajustes para móviles */
 @media (max-width: 768px) {
   .details-image-wrapper {
     height: 300px;
