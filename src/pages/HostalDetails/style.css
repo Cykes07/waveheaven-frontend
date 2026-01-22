@@ -1,168 +1,245 @@
-.details-container {
-  max-width: 1100px; 
-  margin: 40px auto;
-  padding: 0 20px;
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-  color: #333;
-  animation: fadeIn 0.6s ease-out;
+/* src/pages/HostalDetails/style.css */
+
+.details-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  font-family: 'Circular', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  color: #222;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-
-.back-button {
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 30px;
+/* --- HEADER --- */
+.back-link {
   text-decoration: none;
-  color: #666;
-  font-weight: 600;
+  color: #222;
+  font-weight: 500;
   font-size: 0.9rem;
-  transition: color 0.2s, transform 0.2s;
+  display: inline-block;
+  margin-bottom: 16px;
 }
 
-.back-button:hover {
-  color: #000;
-  transform: translateX(-5px);
+.back-link:hover {
+  text-decoration: underline;
 }
 
+.main-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
 
-.details-content {
-  background-color: white;
-  border-radius: 12px; 
+.main-subtitle {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #222;
+  margin-bottom: 24px;
+}
+
+.category-badge {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* --- GALERÍA (ARRIBA) --- */
+.gallery-section {
+  display: flex;
+  gap: 8px;
+  height: 400px; /* Altura fija para la galería */
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 25px rgba(0,0,0,0.04); 
-  border: 1px solid #f5f5f5; 
+  margin-bottom: 48px;
 }
 
+.main-image-container {
+  flex: 2; /* La imagen principal ocupa 2/3 o la mitad */
+  height: 100%;
+}
 
-.details-image-wrapper {
+.secondary-images-container {
+  flex: 1; /* Las secundarias ocupan el resto */
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  height: 100%;
+}
+
+/* Si hay muchas imágenes secundarias, se adaptan */
+.secondary-images-container img:nth-child(n+3) {
+    display: none; /* Oculta más de 2 secundarias para mantener el diseño simple */
+}
+
+.gallery-img {
   width: 100%;
-  height: 550px;
-  background-color: #eee;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.gallery-img:hover {
+  opacity: 0.9;
+}
+
+/* --- CONTENIDO DIVIDIDO (GRID ABAJO) --- */
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* 2 partes izquierda, 1 parte derecha */
+  gap: 80px; /* Espacio amplio entre columnas */
   position: relative;
 }
 
-.details-hero-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; 
-  display: block;
+/* IZQUIERDA */
+.content-left {
+  padding-bottom: 40px;
 }
 
-
-.details-info {
-  padding: 60px 40px; 
-  text-align: center;
-  max-width: 800px; 
-  margin: 0 auto; /
+.host-info h3 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
 }
 
-
-.details-header {
-  margin-bottom: 35px;
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 35px;
+.host-info p {
+  color: #222;
+  margin: 0;
 }
 
-
-.details-title {
-  font-size: 3.2rem; 
-  margin: 0 0 20px 0;
-  color: #111;
-  font-weight: 800;
-  letter-spacing: -1px;
-  line-height: 1.1;
+.divider {
+  height: 1px;
+  background-color: #ddd;
+  margin: 32px 0;
 }
 
-
-.details-category {
-  display: inline-block;
-  background-color: #fff;
-  color: #555;
-  padding: 8px 18px;
-  border-radius: 40px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-weight: 700;
-  border: 1px solid #e0e0e0;
+.description-section p {
+  line-height: 1.6;
+  font-size: 16px;
+  color: #222;
+  white-space: pre-line; /* Respeta saltos de línea */
 }
 
-
-.details-description {
-  font-size: 1.2rem;
-  line-height: 1.9;
-  color: #555;
-  margin-bottom: 50px;
-  font-weight: 300; 
+.amenities-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
+.amenities-list li {
+  font-size: 16px;
+}
 
-.details-footer {
+/* DERECHA (STICKY CARD) */
+.content-right {
+  position: relative;
+}
+
+.booking-card {
+  position: sticky;
+  top: 100px; /* Se pega al techo al bajar */
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  background: white;
+}
+
+.card-header {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 30px;
-  width: 100%;
-}
-
-
-.details-price {
-  font-size: 2.8rem;
-  font-weight: 800;
-  color: #111;
-  display: flex;
+  justify-content: space-between;
   align-items: baseline;
-  gap: 8px;
+  margin-bottom: 24px;
 }
 
-.price-period {
-  font-size: 1.1rem;
-  color: #888;
-  font-weight: 400;
-  text-transform: lowercase;
+.card-price {
+  font-size: 22px;
+  font-weight: 600;
 }
 
+.card-period {
+  font-size: 16px;
+  color: #222;
+}
 
-.reserve-button {
-  background-color: #111;
+.date-picker-mock {
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.date-box {
+  flex: 1;
+  padding: 10px;
+  font-size: 12px;
+  color: #666;
+  border-right: 1px solid #b0b0b0;
+}
+
+.date-box:last-child {
+  border-right: none;
+}
+
+.btn-reserve-primary {
+  width: 100%;
+  background: linear-gradient(to right, #E61E4D 0%, #E31C5F 50%, #D70466 100%); /* Color Airbnb */
   color: white;
   border: none;
-  padding: 20px 70px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  border-radius: 8px; 
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  margin-bottom: 16px;
+  transition: transform 0.1s;
 }
 
-.reserve-button:hover {
-  background-color: #333;
-  transform: translateY(-4px);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+.btn-reserve-primary:active {
+  transform: scale(0.98);
 }
 
+.card-footer p {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #ddd;
+  padding-top: 24px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
-  .details-image-wrapper {
-    height: 350px;
+  .gallery-section {
+    height: 250px;
+    margin-left: -20px; /* Rompe márgenes en móvil */
+    margin-right: -20px;
+    border-radius: 0;
   }
-  .details-info {
-    padding: 40px 20px;
+  
+  .secondary-images-container {
+    display: none; /* Solo muestra la principal en móvil */
   }
-  .details-title {
-    font-size: 2.2rem;
+
+  .content-grid {
+    grid-template-columns: 1fr; /* Columna única */
+    gap: 40px;
   }
-  .details-price {
-    font-size: 2.2rem;
-  }
-  .reserve-button {
-    padding: 18px 50px;
-    width: 100%; 
+  
+  .booking-card {
+    position: static; /* Ya no flota en móvil */
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid #ddd;
+    border-radius: 0;
   }
 }
