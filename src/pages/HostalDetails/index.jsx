@@ -8,16 +8,14 @@ const HostalDetails = () => {
   
   // Estado para guardar el producto que viene del backend
   const [product, setProduct] = useState(null);
-  // Estados para manejar la carga y errores
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Función para pedir los datos al Backend
     const fetchProduct = async () => {
       try {
-        // Asegúrate de que esta URL coincida con tu backend (puerto 8080 normalmente)
-        const response = await fetch(`http://localhost:8080/api/products/${id}`);
+        // Petición al Backend en la nube
+        const response = await fetch(`https://waveheaven-backend.onrender.com/api/products/${id}`);
         
         if (!response.ok) {
           throw new Error('No se pudo cargar el producto');
@@ -36,20 +34,14 @@ const HostalDetails = () => {
     fetchProduct();
   }, [id]);
 
-  // Mostrar mensaje de carga mientras espera al backend
   if (loading) return <div className="details-container"><p>Cargando detalles...</p></div>;
-  
-  // Mostrar error si falla
   if (error || !product) return <div className="details-container"><p>Error: {error || "Producto no encontrado"}</p></div>;
 
-  // --- ADAPTACIÓN DE DATOS (Backend -> Frontend) ---
-  // El backend devuelve 'name', el diseño usa 'title'
-  // El backend devuelve lista 'images', el diseño usa una sola imagen principal
-  
+  // --- ADAPTACIÓN DE DATOS ---
   const displayTitle = product.name || "Sin Nombre";
-  const displayCategory = product.categoryTitle || "General"; // Asumiendo que tu DTO devuelve categoryTitle
+  const displayCategory = product.categoryTitle || "General";
   const displayPrice = product.price || 0;
-  const displayDescription = product.description || "Sin descripción.";
+  const displayDescription = product.description || "Sin descripción disponible para este alojamiento.";
   
   // Obtener la primera imagen si existe, si no usar default
   const displayImage = (product.images && product.images.length > 0) 
@@ -61,7 +53,7 @@ const HostalDetails = () => {
       <Link to="/" className="back-button">← Volver</Link>
 
       <div className="details-content">
-        {/* Imagen Principal */}
+        {/* Imagen Hero Gigante */}
         <div className="details-image-wrapper">
             <img 
               src={displayImage} 
@@ -71,7 +63,7 @@ const HostalDetails = () => {
             />
         </div>
 
-        {/* Información */}
+        {/* Información Centrada y Elegante */}
         <div className="details-info">
           <div className="details-header">
             <h1 className="details-title">{displayTitle}</h1>
@@ -91,15 +83,6 @@ const HostalDetails = () => {
               Reservar Ahora
             </button>
           </div>
-          
-          {/* Si quieres mostrar más imágenes pequeñas abajo (Opcional) */}
-          {product.images && product.images.length > 1 && (
-             <div className="details-gallery-preview">
-                {product.images.slice(1, 4).map((img, index) => (
-                    <img key={index} src={img.url} alt="Vista adicional" className="gallery-thumb" />
-                ))}
-             </div>
-          )}
         </div>
       </div>
     </div>
