@@ -1,245 +1,202 @@
 /* src/pages/HostalDetails/style.css */
 
 .details-page {
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 20px;
-  font-family: 'Circular', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-  color: #222;
+  padding: 30px 20px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #333;
 }
 
-/* --- HEADER --- */
+/* HEADER */
 .back-link {
   text-decoration: none;
-  color: #222;
+  color: #666;
   font-weight: 500;
   font-size: 0.9rem;
   display: inline-block;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
+}
+.back-link:hover { color: #000; }
+
+.product-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 5px 0;
+  color: #111;
 }
 
-.back-link:hover {
-  text-decoration: underline;
+.product-location {
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 25px;
 }
 
-.main-title {
-  font-size: 26px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  line-height: 1.2;
-}
-
-.main-subtitle {
+/* GALERÍA */
+.gallery-container {
   display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: #222;
-  margin-bottom: 24px;
-}
-
-.category-badge {
-  font-weight: 600;
-  text-decoration: underline;
-}
-
-/* --- GALERÍA (ARRIBA) --- */
-.gallery-section {
-  display: flex;
-  gap: 8px;
-  height: 400px; /* Altura fija para la galería */
-  border-radius: 12px;
+  gap: 10px;
+  height: 450px;
+  border-radius: 15px;
   overflow: hidden;
-  margin-bottom: 48px;
+  margin-bottom: 50px;
 }
 
-.main-image-container {
-  flex: 2; /* La imagen principal ocupa 2/3 o la mitad */
+.main-image-box {
+  flex: 2; /* Imagen principal ocupa 2/3 del ancho */
   height: 100%;
 }
 
-.secondary-images-container {
-  flex: 1; /* Las secundarias ocupan el resto */
+.side-images-box {
+  flex: 1; /* Imágenes laterales ocupan 1/3 */
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 8px;
-  height: 100%;
+  grid-template-columns: 1fr 1fr; /* 2 columnas */
+  grid-template-rows: 1fr 1fr;    /* 2 filas */
+  gap: 10px;
 }
 
-/* Si hay muchas imágenes secundarias, se adaptan */
-.secondary-images-container img:nth-child(n+3) {
-    display: none; /* Oculta más de 2 secundarias para mantener el diseño simple */
-}
-
-.gallery-img {
+.img-cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
   cursor: pointer;
   transition: opacity 0.2s;
 }
+.img-cover:hover { opacity: 0.9; }
 
-.gallery-img:hover {
-  opacity: 0.9;
-}
-
-/* --- CONTENIDO DIVIDIDO (GRID ABAJO) --- */
-.content-grid {
+/* LAYOUT COLUMNAS */
+.content-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr; /* 2 partes izquierda, 1 parte derecha */
-  gap: 80px; /* Espacio amplio entre columnas */
-  position: relative;
+  grid-template-columns: 1.5fr 1fr; /* Izquierda más ancha (60%), Derecha (40%) */
+  gap: 60px;
+  align-items: start;
 }
 
-/* IZQUIERDA */
-.content-left {
-  padding-bottom: 40px;
+/* IZQUIERDA: Texto */
+.description-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
 }
 
-.host-info h3 {
-  font-size: 22px;
+.description-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #444;
+  white-space: pre-line; /* Mantiene párrafos del texto */
+}
+
+/* DERECHA: Tarjeta con Tabla */
+.info-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  background: white;
+  position: sticky;
+  top: 40px; /* Se queda fija al bajar */
+}
+
+.info-card h3 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+/* ESTILOS DE LA TABLA */
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+.info-table tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-table tr:last-child {
+  border-bottom: none;
+}
+
+.info-table th {
+  text-align: left;
+  padding: 15px 0;
+  color: #666;
+  font-weight: 500;
+  width: 40%;
+  vertical-align: top;
+}
+
+.info-table td {
+  text-align: right;
+  padding: 15px 0;
+  color: #111;
   font-weight: 600;
-  margin: 0 0 8px 0;
 }
 
-.host-info p {
-  color: #222;
+.price-cell {
+  font-size: 1.2rem;
+  color: #2c3e50;
+}
+
+.price-cell small {
+  font-size: 0.9rem;
+  color: #888;
+  font-weight: 400;
+}
+
+.table-list {
+  list-style: none;
+  padding: 0;
   margin: 0;
 }
 
-.divider {
-  height: 1px;
-  background-color: #ddd;
-  margin: 32px 0;
+.table-list li {
+  margin-bottom: 4px;
+  font-size: 0.95rem;
 }
 
-.description-section p {
-  line-height: 1.6;
-  font-size: 16px;
-  color: #222;
-  white-space: pre-line; /* Respeta saltos de línea */
-}
-
-.amenities-list {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.amenities-list li {
-  font-size: 16px;
-}
-
-/* DERECHA (STICKY CARD) */
-.content-right {
-  position: relative;
-}
-
-.booking-card {
-  position: sticky;
-  top: 100px; /* Se pega al techo al bajar */
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-  background: white;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 24px;
-}
-
-.card-price {
-  font-size: 22px;
-  font-weight: 600;
-}
-
-.card-period {
-  font-size: 16px;
-  color: #222;
-}
-
-.date-picker-mock {
-  border: 1px solid #b0b0b0;
-  border-radius: 8px;
-  display: flex;
-  margin-bottom: 16px;
-}
-
-.date-box {
-  flex: 1;
-  padding: 10px;
-  font-size: 12px;
-  color: #666;
-  border-right: 1px solid #b0b0b0;
-}
-
-.date-box:last-child {
-  border-right: none;
-}
-
-.btn-reserve-primary {
+/* BOTÓN */
+.btn-reserve {
   width: 100%;
-  background: linear-gradient(to right, #E61E4D 0%, #E31C5F 50%, #D70466 100%); /* Color Airbnb */
+  background-color: #111;
   color: white;
+  padding: 16px;
   border: none;
-  padding: 14px;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: 16px;
-  transition: transform 0.1s;
+  transition: background-color 0.2s;
 }
 
-.btn-reserve-primary:active {
-  transform: scale(0.98);
-}
-
-.card-footer p {
-  text-align: center;
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 24px;
-}
-
-.total-row {
-  display: flex;
-  justify-content: space-between;
-  border-top: 1px solid #ddd;
-  padding-top: 24px;
-  font-weight: 600;
-  font-size: 16px;
+.btn-reserve:hover {
+  background-color: #333;
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
-  .gallery-section {
-    height: 250px;
-    margin-left: -20px; /* Rompe márgenes en móvil */
-    margin-right: -20px;
-    border-radius: 0;
+@media (max-width: 900px) {
+  .gallery-container {
+    height: 300px;
+  }
+  .side-images-box {
+    display: none; /* Oculta miniaturas en tablet/móvil */
   }
   
-  .secondary-images-container {
-    display: none; /* Solo muestra la principal en móvil */
-  }
-
-  .content-grid {
-    grid-template-columns: 1fr; /* Columna única */
+  .content-layout {
+    grid-template-columns: 1fr; /* Una sola columna */
     gap: 40px;
   }
   
-  .booking-card {
-    position: static; /* Ya no flota en móvil */
-    box-shadow: none;
+  .info-card {
+    position: static; /* Ya no flota */
     border: none;
-    border-top: 1px solid #ddd;
+    box-shadow: none;
+    padding: 0;
+    border-top: 1px solid #eee;
+    padding-top: 30px;
     border-radius: 0;
   }
 }
