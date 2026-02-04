@@ -8,14 +8,16 @@ export default function CabinTable({ cabins, onEdit, onDelete }){
       <table className="cabin-table">
         <thead>
           <tr>
+            <th>#</th> 
             <th>ID</th>
             <th>Nombre</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {cabins.map(cabin => (
+          {cabins.map((cabin, index) => (
             <tr key={cabin.id}>
+              <td>{index + 1}</td> 
               <td>{cabin.id}</td>
               <td>{cabin.name}</td>
               <td>
@@ -28,7 +30,7 @@ export default function CabinTable({ cabins, onEdit, onDelete }){
                   </button>
                   <button
                     className="action-btn delete-btn"
-                    onClick={() => onDelete(cabin)}
+                    onClick={() => onDelete(cabin)} 
                   >
                     <Trash2 size={16} />
                   </button>
