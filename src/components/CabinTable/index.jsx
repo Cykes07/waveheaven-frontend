@@ -28,7 +28,7 @@ export default function CabinTable({ cabins, onEdit, onDelete }){
                   </button>
                   <button
                     className="action-btn delete-btn"
-                    onClick={() => onDelete(cabin.id)}
+                    onClick={() => onDelete(cabin)}
                   >
                     <Trash2 size={16} />
                   </button>
