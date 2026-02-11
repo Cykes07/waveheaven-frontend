@@ -12,8 +12,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   
   // Estados para paginación del Backend
-  const [currentPage, setCurrentPage] = useState(1); // Empezamos en 1
+  const [currentPage, setCurrentPage] = useState(1); 
   const [totalPages, setTotalPages] = useState(1);
+
+  // Estado para el buscador
+  const [searchTerm, setSearchTerm] = useState("");
 
   // 2. ESTADO PARA RECOMENDACIONES (Separado)
   const [randomRecommendations, setRandomRecommendations] = useState([]);
@@ -23,37 +26,43 @@ export default function Home() {
 
   // --- CARGA DE DATOS ---
 
-  // A. Cargar lista principal (Paginada)
-  const fetchProducts = async (page) => {
+  // A. Cargar lista principal (Paginada y con Búsqueda)
+  const fetchProducts = async (page, term = "") => {
     setLoading(true);
     try {
-      // Convertimos página 1 (frontend) a 0 (backend)
       const pageToSend = page - 1;
-      const response = await fetch(`${API_URL}/api/products?page=${pageToSend}&size=10`); // Pedimos 10 por página
+      let url = `${API_URL}/api/products?page=${pageToSend}&size=10`;
+      
+      // Si el usuario escribió algo, cambiamos al endpoint de búsqueda
+      if (term.trim()) {
+        url = `${API_URL}/api/products/search?name=${encodeURIComponent(term)}&page=${pageToSend}&size=10`;
+      }
+
+      const response = await fetch(url);
       
       if (response.ok) {
         const data = await response.json();
-        
-        // Adaptamos las imágenes
         const formattedProducts = (data.content || []).map(formatProductImage);
-        
         setProducts(formattedProducts);
         setTotalPages(data.totalPages || 1);
+      } else {
+        setProducts([]);
+        setTotalPages(1);
       }
     } catch (error) {
       console.error("Error cargando productos:", error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // B. Cargar recomendaciones (Aleatorias desde el endpoint especial)
+  // B. Cargar recomendaciones
   const fetchRecommendations = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/products/random?count=4`); // Pedimos 4 recomendaciones
+      const response = await fetch(`${API_URL}/api/products/random?count=4`);
       if (response.ok) {
         const data = await response.json();
-        // El endpoint random devuelve una lista directa, no un objeto Page
         const formattedRecs = (Array.isArray(data) ? data : []).map(formatProductImage);
         setRandomRecommendations(formattedRecs);
       }
@@ -62,7 +71,6 @@ export default function Home() {
     }
   };
 
-  // Helper para arreglar imágenes
   const formatProductImage = (item) => ({
     ...item,
     image: (item.images && item.images.length > 0) 
@@ -71,22 +79,21 @@ export default function Home() {
   });
 
   // --- EFECTOS ---
-
-  // 1. Cargar recomendaciones solo al inicio
   useEffect(() => {
     fetchRecommendations();
   }, []);
 
-  // 2. Cargar productos cada vez que cambie la página
   useEffect(() => {
-    fetchProducts(currentPage);
-    
-    // Scroll suave hacia arriba al cambiar de página
+    fetchProducts(currentPage, searchTerm);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentPage]);
+  }, [currentPage, searchTerm]);
 
+  // --- MANEJADORES ---
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1); // Volver a la primera página al buscar
+  };
 
-  // --- MANEJADORES DE PAGINACIÓN ---
   const handlePageChange = (page) => setCurrentPage(page);
   const goToFirstPage = () => setCurrentPage(1);
   const goToPreviousPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
@@ -95,44 +102,46 @@ export default function Home() {
   return (
     <>
       <Header />
-      <SearchBar/>
+      {/* Pasamos la función handleSearch al componente */}
+      <SearchBar onSearch={handleSearch} />
       <main className="home">
         
-        {loading && products.length === 0 ? (
+        {loading ? (
            <div style={{textAlign: 'center', padding: '50px', fontSize: '1.2rem'}}>
-             🌊 Cargando las mejores estancias para ti...
+             🌊 Buscando las mejores estancias para ti...
            </div>
         ) : (
            <>
-            {/* SECCIÓN DE ALOJAMIENTOS (Grid Principal) */}
             <section className="accommodations-section">
-              <h2>Buscar por tipo de alojamiento</h2>
+              <h2>{searchTerm ? `Resultados para "${searchTerm}"` : "Buscar por tipo de alojamiento"}</h2>
               
               {products.length > 0 ? (
                 <>
                   <div className="accommodations-grid">
-                    {/* Ya no usamos slice() porque 'products' trae solo los 10 de esta página */}
                     {products.map((item) => (
                       <ProductCard key={item.id} {...item} />
                     ))}
                   </div>
 
-                  {/* Paginación Conectada al Backend */}
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                    onFirst={goToFirstPage}
-                    onPrevious={goToPreviousPage}
-                    onNext={goToNextPage}
-                  />
+                  {totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        onFirst={goToFirstPage}
+                        onPrevious={goToPreviousPage}
+                        onNext={goToNextPage}
+                    />
+                  )}
                 </>
               ) : (
-                <p style={{textAlign: 'center'}}>No se encontraron alojamientos.</p>
+                <div style={{textAlign: 'center', padding: '40px'}}>
+                    <h3>No encontramos alojamientos con ese nombre.</h3>
+                    <p>Intenta con otra palabra clave.</p>
+                </div>
               )}
             </section>
 
-            {/* SECCIÓN DE RECOMENDACIONES */}
             {randomRecommendations.length > 0 && (
               <section className="recommendations-section">
                 <h2>Recomendaciones para ti</h2>
@@ -141,7 +150,6 @@ export default function Home() {
                     <ProductCard key={`rec-${item.id}`} {...item} />
                   ))}
                 </div>
-                {/* Las recomendaciones suelen ser fijas, no necesitan paginación */}
               </section>
             )}
            </>
@@ -150,4 +158,4 @@ export default function Home() {
       <Footer/>
     </>
   );
-}
+}   

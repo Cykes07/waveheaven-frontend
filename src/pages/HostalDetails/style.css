@@ -199,4 +199,56 @@
     padding-top: 30px;
     border-radius: 0;
   }
+
+  /* SECCIÓN DE COMPARTIR */
+.social-share-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.social-share-section h4 {
+    margin: 0 0 15px 0;
+    font-size: 1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+
+.social-icon:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.social-icon.fb {
+    background-color: #1877f2;
+}
+
+.social-icon.tw {
+    background-color: #1da1f2;
+}
+
+.social-icon.wa {
+    background-color: #25d366
+}
 }

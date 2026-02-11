@@ -28,38 +28,33 @@ const HostalDetails = () => {
   if (loading) return <div className="loading-container">Cargando...</div>;
   if (error || !product) return <div className="error-container">Producto no encontrado</div>;
 
-  // --- Datos ---
   const title = product.name || "Sin Nombre";
   const category = product.categoryTitle || "General";
   const description = product.description || "Sin descripción.";
   const price = product.price ? `$${product.price}` : "Consultar";
   
-  // Listas de detalles (si vienen del backend)
   const characteristics = product.characteristics || [];
   const policies = product.policies || [];
 
-  // --- Imágenes ---
-  // Imagen principal (la primera)
   const mainImage = (product.images && product.images.length > 0) ? product.images[0].url : defaultImage;
-  // Imágenes secundarias (máximo 4 para la cuadrícula lateral)
   const secondaryImages = (product.images && product.images.length > 1) ? product.images.slice(1, 5) : [];
+
+  // --- URL para compartir ---
+  const shareUrl = window.location.href;
+  const shareText = `¡Mira este increíble alojamiento en WaveHeaven! ${title}`;
 
   return (
     <div className="details-page">
-      
-      {/* HEADER */}
       <div className="details-header">
         <Link to="/" className="back-link">← Volver</Link>
         <h1 className="product-title">{title}</h1>
         <p className="product-location">Ubicación excelente • {category}</p>
       </div>
 
-      {/* GALERÍA DE IMÁGENES (ARRIBA) */}
       <div className="gallery-container">
         <div className="main-image-box">
             <img src={mainImage} alt={title} className="img-cover" onError={(e)=>e.target.src=defaultImage}/>
         </div>
-        {/* Grid de fotos secundarias (solo si existen) */}
         {secondaryImages.length > 0 && (
             <div className="side-images-box">
                 {secondaryImages.map((img, index) => (
@@ -71,10 +66,7 @@ const HostalDetails = () => {
         )}
       </div>
 
-      {/* CONTENIDO DIVIDIDO */}
       <div className="content-layout">
-        
-        {/* IZQUIERDA: DESCRIPCIÓN */}
         <div className="column-left">
             <div className="description-section">
                 <h2>Descripción del alojamiento</h2>
@@ -82,45 +74,26 @@ const HostalDetails = () => {
             </div>
         </div>
 
-        {/* DERECHA: TABLA DE INFORMACIÓN Y RESERVA */}
         <div className="column-right">
             <div className="info-card">
                 <h3>Detalles y Reserva</h3>
-                
-                {/* TABLA DE INFORMACIÓN */}
                 <table className="info-table">
                     <tbody>
-                        <tr>
-                            <th>Categoría</th>
-                            <td>{category}</td>
-                        </tr>
-                        <tr>
-                            <th>Precio</th>
-                            <td className="price-cell">{price} <small>/ noche</small></td>
-                        </tr>
-                        
-                        {/* Renderizar características si existen */}
+                        <tr><th>Categoría</th><td>{category}</td></tr>
+                        <tr><th>Precio</th><td className="price-cell">{price} <small>/ noche</small></td></tr>
                         {characteristics.length > 0 && (
-                            <tr>
-                                <th>Características</th>
-                                <td>
-                                    <ul className="table-list">
-                                        {characteristics.map(c => <li key={c.id}>{c.name}</li>)}
-                                    </ul>
-                                </td>
-                            </tr>
+                            <tr><th>Características</th><td>
+                                <ul className="table-list">
+                                    {characteristics.map(c => <li key={c.id}>{c.name}</li>)}
+                                </ul>
+                            </td></tr>
                         )}
-
-                        {/* Renderizar políticas si existen */}
                         {policies.length > 0 && (
-                            <tr>
-                                <th>Políticas</th>
-                                <td>
-                                    <ul className="table-list">
-                                        {policies.map(p => <li key={p.id}>{p.title}</li>)}
-                                    </ul>
-                                </td>
-                            </tr>
+                            <tr><th>Políticas</th><td>
+                                <ul className="table-list">
+                                    {policies.map(p => <li key={p.id}>{p.title}</li>)}
+                                </ul>
+                            </td></tr>
                         )}
                     </tbody>
                 </table>
@@ -128,9 +101,37 @@ const HostalDetails = () => {
                 <div className="action-area">
                     <button className="btn-reserve">Reservar Ahora</button>
                 </div>
+
+                {/* --- SECCIÓN NUEVA: COMPARTIR --- */}
+                <div className="social-share-section">
+                    <h4>Compartir en redes</h4>
+                    <div className="social-icons">
+                        <a 
+                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} 
+                            target="_blank" rel="noopener noreferrer"
+                            className="social-icon fb" title="Facebook"
+                        >
+                           FB
+                        </a>
+                        <a 
+                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`} 
+                            target="_blank" rel="noopener noreferrer"
+                            className="social-icon tw" title="Twitter"
+                        >
+                           TW
+                        </a>
+                        <a 
+                            href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`} 
+                            target="_blank" rel="noopener noreferrer"
+                            className="social-icon wa" title="WhatsApp"
+                        >
+                           WA
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </div>
-
       </div>
     </div>
   );
