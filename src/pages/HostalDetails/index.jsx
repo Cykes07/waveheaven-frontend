@@ -28,6 +28,22 @@ const HostalDetails = () => {
   if (loading) return <div className="loading-container">Cargando...</div>;
   if (error || !product) return <div className="error-container">Producto no encontrado</div>;
 
+  // --- 1. FUNCIÓN PARA ARREGLAR LAS IMÁGENES ---
+  // Esta función decide si la imagen necesita una "/" al principio o no.
+  const getCorrectImageUrl = (imageObj) => {
+    if (!imageObj || !imageObj.url) return defaultImage;
+    
+    // Si es una URL de internet (https://...), la dejamos tal cual
+    if (imageObj.url.startsWith('http')) {
+        return imageObj.url;
+    }
+    
+    // Si es local (ej: "image1.jpg"), le agregamos "/" para que la busque en la raíz
+    // Esto evita el error de buscar en /detail/1/image1.jpg
+    return imageObj.url.startsWith('/') ? imageObj.url : `/${imageObj.url}`;
+  };
+
+  // --- Datos del Producto ---
   const title = product.name || "Sin Nombre";
   const category = product.categoryTitle || "General";
   const description = product.description || "Sin descripción.";
@@ -36,8 +52,14 @@ const HostalDetails = () => {
   const characteristics = product.characteristics || [];
   const policies = product.policies || [];
 
-  const mainImage = (product.images && product.images.length > 0) ? product.images[0].url : defaultImage;
-  const secondaryImages = (product.images && product.images.length > 1) ? product.images.slice(1, 5) : [];
+  // --- 2. USAMOS LA FUNCIÓN DE IMÁGENES ---
+  const mainImage = (product.images && product.images.length > 0) 
+    ? getCorrectImageUrl(product.images[0]) 
+    : defaultImage;
+
+  const secondaryImages = (product.images && product.images.length > 1) 
+    ? product.images.slice(1, 5).map(img => ({ ...img, url: getCorrectImageUrl(img) })) 
+    : [];
 
   // --- URL para compartir ---
   const shareUrl = window.location.href;
@@ -52,14 +74,27 @@ const HostalDetails = () => {
       </div>
 
       <div className="gallery-container">
+        {/* Imagen Principal */}
         <div className="main-image-box">
-            <img src={mainImage} alt={title} className="img-cover" onError={(e)=>e.target.src=defaultImage}/>
+            <img 
+                src={mainImage} 
+                alt={title} 
+                className="img-cover" 
+                onError={(e)=>e.target.src=defaultImage}
+            />
         </div>
+        
+        {/* Imágenes Secundarias */}
         {secondaryImages.length > 0 && (
             <div className="side-images-box">
                 {secondaryImages.map((img, index) => (
                     <div key={index} className="side-img-item">
-                        <img src={img.url} alt={`Vista ${index}`} className="img-cover" />
+                        <img 
+                            src={img.url} 
+                            alt={`Vista ${index}`} 
+                            className="img-cover" 
+                            onError={(e)=>e.target.src=defaultImage}
+                        />
                     </div>
                 ))}
             </div>
@@ -102,7 +137,7 @@ const HostalDetails = () => {
                     <button className="btn-reserve">Reservar Ahora</button>
                 </div>
 
-                {/* --- SECCIÓN NUEVA: COMPARTIR --- */}
+                {/* --- SECCIÓN DE COMPARTIR --- */}
                 <div className="social-share-section">
                     <h4>Compartir en redes</h4>
                     <div className="social-icons">
