@@ -225,11 +225,52 @@ const Admin = () => {
 
   const migrarDatos = async () => {
     const token = getToken();
-    // (Tu lógica de migración sigue igual, solo resumida aquí para no llenar espacio)
-    if (!confirm("¿Estás seguro de migrar datos?")) return;
-    // ... lógica de migración ...
-    alert(`Proceso simulado de migración.`);
-    fetchProducts(currentPage);
+    let cont = 0;
+
+    // Usamos la variable 'accommodations' que tienes declarada al principio
+    if (!confirm(`¿Estás seguro de que quieres subir ${accommodations.length} productos a la Base de Datos?`)) return;
+
+    console.log("Iniciando migración...");
+
+    // Recorremos tu lista 'accommodations'
+    for (const item of accommodations) {
+      
+      // Construimos el objeto como le gusta al Backend
+      const payload = {
+        name: item.title,               // Tu 'title' pasa a ser 'name'
+        description: "Alojamiento exclusivo con vistas increíbles.", // Descripción por defecto
+        categoryId: 1,                  // Asignamos a la categoría 1
+        price: 120.0 + (item.id * 10),  // Precio inventado variable (porque tu array no tiene precio)
+        images: [
+           // Tu 'image' ("image1.jpg") pasa a ser un objeto con url
+           // Usamos una imagen real de internet para que no salga rota
+           { url: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2" }
+        ]
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/api/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            console.log(`✅ Subido: ${payload.name}`);
+            cont++;
+        } else {
+            console.error(`❌ Error subiendo ${payload.name}`);
+        }
+      } catch (e) {
+        console.error("Error de red al subir producto");
+      }
+    }
+
+    alert(`¡Proceso terminado! Se subieron ${cont} productos con éxito.`);
+    fetchProducts(currentPage); // Recargar la tabla para verlos
   };
 
   return (
