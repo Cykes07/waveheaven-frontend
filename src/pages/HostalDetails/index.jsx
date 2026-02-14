@@ -216,15 +216,40 @@ const HostalDetails = () => {
                 )}
 
                 {/* REDES SOCIALES (Actualizado con Instagram) */}
+                {/* --- SECCIÓN DE COMPARTIR (CORREGIDA) --- */}
                 <div className="social-share-section">
                     <h4>Compartir alojamiento</h4>
                     <div className="social-icons">
-                        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" className="social-icon fb">FB</a>
+                        <a 
+                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="social-icon fb" 
+                            title="Facebook"
+                        >
+                        <i className="fa-brands fa-facebook-f"></i> {/* Icono FB */}
+                        </a>
                         
-                        {/* INSTAGRAM (IG no tiene API directa de compartir URL, redirigimos al perfil o home) */}
-                        <a href="https://www.instagram.com/" target="_blank" className="social-icon ig">IG</a>
+                        {/* INSTAGRAM */}
+                        <a 
+                            href="https://www.instagram.com/" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="social-icon ig" 
+                            title="Instagram"
+                        >
+                        <i className="fa-brands fa-instagram"></i> {/* Icono IG */}
+                        </a>
                         
-                        <a href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`} target="_blank" className="social-icon wa">WA</a>
+                        <a 
+                            href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="social-icon wa" 
+                            title="WhatsApp"
+                        >
+                        <i className="fa-brands fa-whatsapp"></i> {/* Icono WA */}
+                        </a>
                     </div>
                 </div>
 

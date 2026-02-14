@@ -329,3 +329,55 @@
 .social-icon.ig { 
     background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
 }
+
+/* src/pages/HostalDetails/style.css */
+
+/* ... otros estilos ... */
+
+.social-share-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.social-share-section h4 {
+    margin: 0 0 15px 0;
+    font-size: 1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* AQUÍ ESTÁ LA CLAVE PARA SEPARARLOS */
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Aumentamos el espacio entre iconos */
+    margin-top: 10px;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px; /* Un poco más grandes */
+    height: 45px;
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem; /* Icono más grande */
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.social-icon:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* Colores específicos */
+.social-icon.fb { background-color: #1877f2; }
+.social-icon.wa { background-color: #25d366; }
+.social-icon.ig { 
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+}
